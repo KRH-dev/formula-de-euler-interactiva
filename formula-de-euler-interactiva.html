@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Euler en Radianes</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f8fafc; display: flex; flex-direction: column; align-items: center; padding: 20px; color: #1e293b; }
+        .container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 900px; width: 100%; text-align: center; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+        .visual-box { display: flex; flex-wrap: wrap; justify-content: center; gap: 40px; align-items: center; margin-bottom: 30px; }
+        canvas { background: #ffffff; border: 2px solid #f1f5f9; border-radius: 50%; cursor: crosshair; transition: box-shadow 0.3s; }
+        canvas:hover { box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        
+        .math-display { background: #f1f5f9; padding: 30px; border-radius: 16px; min-width: 350px; border-left: 6px solid #3b82f6; }
+        .step { margin: 12px 0; font-size: 1.25rem; }
+        .final-result { font-size: 2.2rem; color: #10b981; font-weight: 800; margin-top: 20px; padding-top: 15px; border-top: 2px dashed #cbd5e1; }
+        
+        .controls { background: #ffffff; padding: 20px; border-radius: 12px; border: 1px solid #e2e8f0; }
+        .btn-group { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin: 12px 0; }
+        button { padding: 10px 16px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; background: #3b82f6; color: white; transition: all 0.2s; }
+        button.neg { background: #64748b; }
+        button:hover { filter: brightness(1.1); transform: scale(1.05); }
+
+        /* Estilos para la nueva ventana de explicación */
+        .explanation-container { background: white; padding: 30px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.05); max-width: 900px; width: 100%; border: 1px solid #e2e8f0; }
+        .explanation-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { padding: 10px; border-bottom: 1px solid #e2e8f0; text-align: center; }
+        th { background-color: #f1f5f9; color: #334155; }
+        .info-tag { background: #dbeafe; color: #1e40af; padding: 2px 8px; border-radius: 4px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2 style="margin-bottom: 5px;">Representación en Radianes</h2>
+    <p style="color: #64748b; margin-bottom: 25px;">\( e^{j\theta} = \cos(\theta) + j\sin(\theta) \)</p>
+    
+    <div class="visual-box">
+        <canvas id="eulerCanvas" width="320" height="320"></canvas>
+        
+        <div class="math-display">
+            <div id="step-1" class="step"></div>
+            <div id="step-2" class="step"></div>
+            <div id="final-result" class="final-result"></div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <strong>Valores típicos de \(\pi\)</strong>
+        <div class="btn-group">
+            <button onclick="setAngle(0)">0</button>
+            <button onclick="setAngle(Math.PI/2)">\(\pi/2\)</button>
+            <button onclick="setAngle(Math.PI)">\(\pi\)</button>
+            <button onclick="setAngle(3*Math.PI/2)">\(3\pi/2\)</button>
+            <button onclick="setAngle(2*Math.PI)">\(2\pi\)</button>
+        </div>
+        <div class="btn-group">
+            <button class="neg" onclick="setAngle(-Math.PI/2)">\(-\pi/2\)</button>
+            <button class="neg" onclick="setAngle(-Math.PI)">\(-\pi\)</button>
+            <button class="neg" onclick="setAngle(-3*Math.PI/2)">\(-3\pi/2\)</button>
+            <button class="neg" onclick="setAngle(-2*Math.PI)">\(-2\pi\)</button>
+        </div>
+    </div>
+</div>
+
+<div class="explanation-container">
+    <h3>Guía de Referencia: Casos Críticos</h3>
+    <div class="explanation-grid">
+        <div>
+            <p>La <strong>Fórmula de Euler</strong> conecta la exponenciación compleja con la trigonometría. En el círculo unitario:</p>
+            <ul>
+                <li>La parte <strong>Real</strong> es \(\cos(\theta)\) (Eje X).</li>
+                <li>La parte <strong>Imaginaria</strong> es \(\sin(\theta)\) (Eje Y).</li>
+            </ul>
+            <p>Es la base del análisis de señales, fasores y corriente alterna.</p>
+        </div>
+        <div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Ángulo (\(\theta\))</th>
+                        <th>Forma Exponencial</th>
+                        <th>Resultado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>\(0\)</td>
+                        <td>\(e^{j0}\)</td>
+                        <td><span class="info-tag">1</span></td>
+                    </tr>
+                    <tr>
+                        <td>\(\pi/2\)</td>
+                        <td>\(e^{j\pi/2}\)</td>
+                        <td><span class="info-tag">j</span></td>
+                    </tr>
+                    <tr>
+                        <td>\(\pi\)</td>
+                        <td>\(e^{j\pi}\)</td>
+                        <td><span class="info-tag">-1</span></td>
+                    </tr>
+                    <tr>
+                        <td>\(3\pi/2\)</td>
+                        <td>\(e^{j3\pi/2}\)</td>
+                        <td><span class="info-tag">-j</span></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('eulerCanvas');
+    const ctx = canvas.getContext('2d');
+    const centerX = canvas.width / 2;
+    const centerY = canvas.height / 2;
+    const radius = 120;
+    let currentAngle = 0;
+
+    const piFractions = {
+        "0.00": "0",
+        "1.57": "\\frac{\\pi}{2}",
+        "3.14": "\\pi",
+        "4.71": "\\frac{3\\pi}{2}",
+        "6.28": "2\\pi",
+        "-1.57": "-\\frac{\\pi}{2}",
+        "-3.14": "-\\pi",
+        "-4.71": "-\\frac{3\\pi}{2}",
+        "-6.28": "-2\\pi"
+    };
+
+    function getAngleLabel(ang) {
+        const key = ang.toFixed(2);
+        return piFractions[key] || ang.toFixed(2);
+    }
+
+    function draw() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        
+        ctx.strokeStyle = '#f1f5f9';
+        ctx.beginPath();
+        ctx.moveTo(0, centerY); ctx.lineTo(canvas.width, centerY);
+        ctx.moveTo(centerX, 0); ctx.lineTo(centerX, canvas.height);
+        ctx.stroke();
+
+        ctx.strokeStyle = '#e2e8f0';
+        ctx.setLineDash([2, 4]);
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.stroke();
+        ctx.setLineDash([]);
+
+        const x = centerX + radius * Math.cos(currentAngle);
+        const y = centerY - radius * Math.sin(currentAngle);
+
+        ctx.lineWidth = 3;
+        ctx.strokeStyle = '#3b82f6';
+        ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.lineTo(x, centerY); ctx.stroke();
+        
+        ctx.strokeStyle = '#f43f5e';
+        ctx.beginPath(); ctx.moveTo(x, centerY); ctx.lineTo(x, y); ctx.stroke();
+
+        ctx.strokeStyle = '#1e293b';
+        ctx.lineWidth = 4;
+        ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(centerX, centerY); ctx.lineTo(x, y); ctx.stroke();
+
+        updateMath();
+    }
+
+    function updateMath() {
+        const label = getAngleLabel(currentAngle);
+        const cosVal = Math.cos(currentAngle).toFixed(2);
+        const sinVal = Math.sin(currentAngle).toFixed(2);
+
+        document.getElementById('step-1').innerHTML = `\\[e^{j(${label})} = \\cos(${label}) + j\\sin(${label})\\]`;
+        document.getElementById('step-2').innerHTML = `\\[= \\mathbf{${cosVal}} + j(\\mathbf{${sinVal}})\\]`;
+
+        let c = parseFloat(cosVal), s = parseFloat(sinVal);
+        let final = "";
+        if (Math.abs(s) < 0.01) final = `${c}`;
+        else if (Math.abs(c) < 0.01) final = `${s === -1 ? '-' : (s === 1 ? '' : s)}j`;
+        else final = `${c} ${s >= 0 ? '+' : ''} ${s}j`;
+
+        document.getElementById('final-result').innerText = `= ${final}`;
+
+        if (window.MathJax) MathJax.typesetPromise();
+    }
+
+    function setAngle(val) { currentAngle = val; draw(); }
+
+    canvas.addEventListener('mousedown', (e) => {
+        function move(e) {
+            const rect = canvas.getBoundingClientRect();
+            currentAngle = -Math.atan2((e.clientY - rect.top) - centerY, (e.clientX - rect.left) - centerX);
+            draw();
+        }
+        window.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', () => window.removeEventListener('mousemove', move));
+        move(e);
+    });
+
+    draw();
+</script>
+
+</body>
+</html>
